@@ -10,8 +10,9 @@ A TensorFlow implementation of Deep Spatio-Temporal Residual Networks (ST-ResNet
 
 ## Prerequisites
 
-* Python 3
-* Tensorflow 2
+* Python 3.10.8
+* Tensorflow 2.10.0
+* Numpy 1.23.5
 
 ## Usage
 

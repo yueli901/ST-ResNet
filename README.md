@@ -1,4 +1,4 @@
-# ST-ResNet in Tensorflow
+# ST-ResNet in Tensorflow 2
 
 A TensorFlow implementation of Deep Spatio-Temporal Residual Networks (ST-ResNet) from the paper ["Deep Spatio-Temporal Residual Networks for Citywide Crowd Flows Prediction"](https://arxiv.org/abs/1610.00081). ST-ResNet is an end-to-end deep learning model which uses the unique properties of temporal closeness, period and trend of spatio-temporal data, to forecast the in-flow and out-flow of crowds in a city region. The current code is an implementation of the ST-ResNet architecture, which is adapted from the work by [Sneha Singhania](https://github.com/snehasinghania/STResNet) and the work by [Tolic Wang](https://github.com/TolicWang/DeepST). Singhania used randomly generated data to run through the model, which was written in TensorFlow 1.8 and Python 2.7. Wang obtained the original data and built the model using python 3.6 and tensorflow 1.5. This repository mainly inherit the contribution of Wang and update all the code to tensorflow 2. 
 

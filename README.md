@@ -27,6 +27,8 @@ File structure:
 * `preprocessing/STMatrix.py`: Data cleaning & create all available (X,y) pairs to match the input of the model.
 * `preprocessing/TaxiBJ`: Loading data, and perform normalization and run STMatrix.py, merging external variables, and save the processed data.
 
+Here is an illustration of the [data flow](./assets/data_flow_illustration.pdf).
+
 ## Usage
 #### TaxiBJ Data
 

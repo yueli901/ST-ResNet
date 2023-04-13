@@ -17,7 +17,7 @@ def load_holiday(timeslots, fname=os.path.join(DATAPATH, 'BJ_Holiday.txt')):
     """
     Generate the holiday component of the external variables.
     @Input: a list of timestamps in string format
-    @Output: [[1],[1],[0],[0],[0]...] shape = (len(timeslots),)
+    @Output: [[1],[1],[0],[0],[0]...] shape = (len(timeslots),1)
     """
     f = open(fname, 'r')
     holidays = f.readlines()
@@ -180,16 +180,16 @@ def remove_incomplete_days(data, timestamps, T=48):
 
 def process_dataset(T=48, nb_flow=2, len_closeness=None, len_period=None, len_trend=None,
                  len_test=None, preprocess_name='preprocessing.pkl',
-                 meta_data=True, meteorol_data=True, holiday_data=True):
+                 weekday_data=True, meteorol_data=True, holiday_data=True):
     """
     Load all 4-year data, generate all (x,y) pairs for model input and conduct traine-test split.
     @Output:
-        X_train: [XC_train, XP_train, XT_train, meta_feature_train] with shape [[(#train,32,32,6)]*3,(#train,metadata_dim)]
+        X_train: [XC_train, XP_train, XT_train, ex_feature_train] with shape [[(#train,32,32,6)]*3,(#train,extdata_dim)]
         Y_train: Y_train with shape (#train,32,32,2)
-        X_test: [XC_test, XP_tests, XT_test, meta_feature_test] with shape [[(#test,32,32,6)]*3,(#test,metadata_dim)]
+        X_test: [XC_test, XP_tests, XT_test, ext_feature_test] with shape [[(#test,32,32,6)]*3,(#test,extdata_dim)]
         Y_test: Y_test with shape (#train,32,32,2)
         mmn: MinMaxNormalization object containing the scaling parameters (min, max)
-        metadata_dim: the dimension of external variables in total
+        extdata_dim: the dimension of external variables in total
         timestamp_train: timestamps used for the train set (matched to y)
         timestamp_test: timestamps used for the test set (matched to y)
     """
@@ -238,29 +238,29 @@ def process_dataset(T=48, nb_flow=2, len_closeness=None, len_period=None, len_tr
         timestamps_Y += _timestamps_Y 
     
     # Extract and generate external variables for all available timestamp in timestamps_Y
-    meta_feature = []
-    if meta_data:
+    ext_feature = []
+    if weekday_data:
         # load time feature
         time_feature = timestamp2vec(timestamps_Y)
-        meta_feature.append(time_feature)
+        ext_feature.append(time_feature)
     if holiday_data:
         # load holiday
         holiday_feature = load_holiday(timestamps_Y)
-        meta_feature.append(holiday_feature)
+        ext_feature.append(holiday_feature)
     if meteorol_data:
         # load meteorol data
         meteorol_feature = load_meteorol(timestamps_Y)
-        meta_feature.append(meteorol_feature)
+        ext_feature.append(meteorol_feature)
 
-    meta_feature = np.hstack(meta_feature) if len(
-        meta_feature) > 0 else np.asarray(meta_feature)
-    metadata_dim = meta_feature.shape[1] if len(
-        meta_feature.shape) > 1 else None
-    if metadata_dim < 1:
-        metadata_dim = None
-    if meta_data and holiday_data and meteorol_data:
+    ext_feature = np.hstack(ext_feature) if len(
+        ext_feature) > 0 else np.asarray(ext_feature)
+    extdata_dim = ext_feature.shape[1] if len(
+        ext_feature.shape) > 1 else None
+    if extdata_dim < 1:
+        extdata_dim = None
+    if weekday_data and holiday_data and meteorol_data:
         print('time feature:', time_feature.shape, 'holiday feature:', holiday_feature.shape,
-              'meteorol feature: ', meteorol_feature.shape, 'external feature: ', meta_feature.shape)
+              'meteorol feature: ', meteorol_feature.shape, 'external feature: ', ext_feature.shape)
 
     XC = np.vstack(XC)  # shape = (15072,6,32,32)
     XP = np.vstack(XP)  # shape = (15072,6,32,32)
@@ -288,10 +288,10 @@ def process_dataset(T=48, nb_flow=2, len_closeness=None, len_period=None, len_tr
         if l > 0:
             X_test.append(X_)
 
-    if metadata_dim is not None:
-        meta_feature_train, meta_feature_test = meta_feature[:-len_test], meta_feature[-len_test:]
-        X_train.append(meta_feature_train)
-        X_test.append(meta_feature_test)
+    if extdata_dim is not None:
+        ext_feature_train, ext_feature_test = ext_feature[:-len_test], ext_feature[-len_test:]
+        X_train.append(ext_feature_train)
+        X_test.append(ext_feature_test)
 
     for _X in X_train:
         print(_X.shape, )
@@ -299,7 +299,7 @@ def process_dataset(T=48, nb_flow=2, len_closeness=None, len_period=None, len_tr
     for _X in X_test:
         print(_X.shape, )
     print()
-    return X_train, Y_train, X_test, Y_test, mmn, metadata_dim, timestamp_train, timestamp_test
+    return X_train, Y_train, X_test, Y_test, mmn, extdata_dim, timestamp_train, timestamp_test
 
 
 def cache(fname, X_train, Y_train, X_test, Y_test, external_dim, timestamp_train, timestamp_test):
@@ -343,7 +343,7 @@ def read_cache(fname):
     return X_train, Y_train, X_test, Y_test, mmn, external_dim, timestamp_train, timestamp_test
 
 
-def load_data(len_closeness, len_period, len_trend, len_test, meta_data=True, meteorol_data=True, holiday_data=True):
+def load_data(len_closeness, len_period, len_trend, len_test, weekday_data=True, meteorol_data=True, holiday_data=True):
     '''
     Load post-processed data directly or generate the data for the first time and save it.
     '''
@@ -359,7 +359,7 @@ def load_data(len_closeness, len_period, len_trend, len_test, meta_data=True, me
             os.mkdir(CACHEPATH)
         X_train, Y_train, X_test, Y_test, mmn, external_dim, timestamp_train, timestamp_test = \
             process_dataset(len_closeness=len_closeness, len_period=len_period, len_trend=len_trend,
-                         len_test=len_test, meta_data=True, meteorol_data=True, holiday_data=True)
+                         len_test=len_test, weekday_data=True, meteorol_data=True, holiday_data=True)
         cache(fname, X_train, Y_train, X_test, Y_test, external_dim, timestamp_train, timestamp_test)
         print("%s generated and saved successfully" % fname)
     return X_train, Y_train, X_test, Y_test, mmn, external_dim, timestamp_train, timestamp_test

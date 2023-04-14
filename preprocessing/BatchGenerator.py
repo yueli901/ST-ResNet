@@ -5,7 +5,7 @@ def batch_generator(X, y, batch_size):
     """
     Batch generator 
     The function repeatedly yields batches of the specified size, randomly shuffling the data once an epoch is completed.
-    @input: all (X,y) pairs for train data
+    @input: all (X,y) pairs for train/test data
         X: [[(train/test size,32,32,6)]*3,(train/test size,external_dim)]
         y: (train/test size,32,32,2)
         batch_size: default to 32
